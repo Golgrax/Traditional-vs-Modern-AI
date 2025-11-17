@@ -13,26 +13,44 @@ function toggleFullScreen() {
 
 fullscreenBtn.addEventListener('click', toggleFullScreen);
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'F11') {
-        e.preventDefault(); // Prevent default F11 behavior
-        toggleFullScreen();
+// --- Keyboard & Mouse Wheel Scrolling Bypass ---
+function handleScroll(event) {
+    // Check if the iframe and its content window are accessible
+    if (iframe && iframe.contentWindow) {
+        if (event.type === 'keydown') {
+            const scrollAmount = 50; // Pixels to scroll on each key press
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                iframe.contentWindow.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                iframe.contentWindow.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+            }
+        } else if (event.type === 'wheel') {
+            event.preventDefault();
+            // Use the wheel delta to scroll the iframe content
+            iframe.contentWindow.scrollBy({ top: event.deltaY, behavior: 'smooth' });
+        }
     }
-});
+}
 
+document.addEventListener('keydown', handleScroll);
+// We need to listen for the wheel event on the main window
+// because the iframe might not capture it if the mouse is not over it.
+// A more robust solution would listen on both.
+window.addEventListener('wheel', handleScroll, { passive: false });
+
+
+// --- Proximity detection for the fullscreen button ---
 function handleMouseMove(e) {
     const rect = fullscreenBtn.getBoundingClientRect();
-    const proximity = 150; // The distance in pixels to trigger the 'is-near' state
+    const proximity = 150;
 
-    // Center of the button
     const btnX = rect.left + rect.width / 2;
     const btnY = rect.top + rect.height / 2;
-
-    // Cursor position
     const cursorX = e.clientX;
     const cursorY = e.clientY;
 
-    // Calculate distance
     const distance = Math.sqrt(Math.pow(btnX - cursorX, 2) + Math.pow(btnY - cursorY, 2));
 
     if (distance < proximity) {
@@ -42,34 +60,26 @@ function handleMouseMove(e) {
     }
 }
 
-// This function sets up the listener on the iframe's content.
-// It needs to be re-run every time the iframe's src changes.
-function setupIframeListener() {
+function setupIframeListeners() {
     try {
-        // Also listen on the iframe's document
-        iframe.contentWindow.document.addEventListener('mousemove', handleMouseMove);
+        const iframeDoc = iframe.contentWindow.document;
+        // Listen for events inside the iframe
+        iframeDoc.addEventListener('mousemove', handleMouseMove);
+        // Also attach the wheel listener here to capture events inside the iframe
+        iframe.contentWindow.addEventListener('wheel', handleScroll, { passive: false });
     } catch (e) {
-        console.error("Could not attach mousemove listener to iframe. This can happen due to cross-origin restrictions.", e);
+        console.error("Could not attach listeners to iframe.", e);
     }
 }
 
-// Listen on the parent window
 document.addEventListener('mousemove', handleMouseMove);
+iframe.addEventListener('load', setupIframeListeners);
 
-// Listen for when the iframe loads for the first time
-iframe.addEventListener('load', setupIframeListener);
-
-// Since navigation now happens inside the iframe, we need a way
-// to re-attach the listener. The simplest way is to use a MutationObserver
-// to detect when the iframe's 'src' attribute changes.
 const observer = new MutationObserver((mutationsList) => {
     for(const mutation of mutationsList) {
         if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-            // The src has changed, so we need to wait for it to load and then re-attach.
-            iframe.addEventListener('load', setupIframeListener, { once: true });
+            iframe.addEventListener('load', setupIframeListeners, { once: true });
         }
     }
 });
-
-// Start observing the iframe for attribute changes
 observer.observe(iframe, { attributes: true });

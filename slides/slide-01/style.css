@@ -1,3 +1,11 @@
+/* Hide scrollbar UI while allowing scrolling */
+html, body {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;  /* For IE and Edge */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
 :root {
   --bg: #0f172a;
   --card: rgba(15, 23, 42, 0.85);
@@ -128,4 +136,3 @@ figcaption {
 .nav-next {
   right: 2rem;
 }
-

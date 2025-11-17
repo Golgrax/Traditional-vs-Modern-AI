@@ -1,3 +1,11 @@
+/* Hide scrollbar UI while allowing scrolling */
+html, body {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;  /* For IE and Edge */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
 :root {
   --bg: #001b26;
   --gradient: #013749;
@@ -180,7 +188,3 @@ h1 {
 .nav-next {
   right: 2rem;
 }
-
-
-
-

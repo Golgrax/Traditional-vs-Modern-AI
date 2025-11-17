@@ -1,3 +1,11 @@
+/* Hide scrollbar UI while allowing scrolling */
+html, body {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;  /* For IE and Edge */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
 :root {
   --bg: #041014;
   --bg-secondary: #031f2b;
@@ -192,4 +200,3 @@ h1 {
   border: 1px dashed rgba(148, 163, 184, 0.35);
   color: var(--muted);
 }
-
