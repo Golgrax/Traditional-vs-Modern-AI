@@ -73,6 +73,13 @@ h1 {
   color: var(--muted);
 }
 
+.intro {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
 .visual {
   margin-top: 2.5rem;
   background: rgba(15, 23, 42, 0.7);
